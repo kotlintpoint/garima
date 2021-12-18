@@ -18,7 +18,7 @@
     </fragment>
     <fragment
         android:id="@+id/searchByFragment"
-        android:name="minfotech.garima.fragments.SearchByFragment"
+        android:name="minfotech.garima.fragments.SearchByFilterFragment"
         android:label="fragment_search_by"
         tools:layout="@layout/fragment_search_by" >
         <action
@@ -29,5 +29,23 @@
         android:id="@+id/searchResultFragment"
         android:name="minfotech.garima.fragments.SearchResultFragment"
         android:label="fragment_search_result"
-        tools:layout="@layout/fragment_search_result" />
+        tools:layout="@layout/fragment_search_result" >
+        <action
+            android:id="@+id/action_searchResultFragment_to_photosFragment"
+            app:destination="@id/photosFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/photosFragment"
+        android:name="minfotech.garima.fragments.PhotosFragment"
+        android:label="fragment_photos"
+        tools:layout="@layout/fragment_photos" >
+        <action
+            android:id="@+id/action_photosFragment_to_photosFormFragment"
+            app:destination="@id/photosFormFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/photosFormFragment"
+        android:name="minfotech.garima.fragments.PhotosFormFragment"
+        android:label="fragment_photos_form"
+        tools:layout="@layout/fragment_photos_form" />
 </navigation>

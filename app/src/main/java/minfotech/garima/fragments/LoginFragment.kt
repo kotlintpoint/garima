@@ -1,5 +1,7 @@
 package minfotech.garima.fragments
 
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -8,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
+import com.google.gson.Gson
 import minfotech.garima.R
 import minfotech.garima.databinding.FragmentLoginBinding
 import minfotech.garima.model.User
@@ -36,6 +39,16 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // check if login
+        val preference=requireContext().getSharedPreferences(
+            getString(R.string.app_name),
+            MODE_PRIVATE
+        )
+        if(preference.getBoolean("isLogin",false)){
+            Navigation.findNavController(requireView())
+                .navigate(R.id.action_loginFragment_to_searchByFragment)
+        }
+
         binding.apply {
             btnSubmit.setOnClickListener {
                 val username=etUsername.text.toString()
@@ -54,26 +67,46 @@ class LoginFragment : Fragment() {
     }
 
     private fun validateLogin(username: String, password: String) {
+        binding.btnSubmit.isEnabled=false
         val service = GarimaClient.getClient()
+
         val fields= hashMapOf(
             "Username" to username,
             "Password" to password
         )
         service.Login(fields).enqueue(object : Callback<List<User>> {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
-                val user= response.body()?.get(0)
-                if(user!=null){
-                    Navigation.findNavController(requireView())
-                        .navigate(R.id.action_loginFragment_to_searchByFragment)
+                binding.btnSubmit.isEnabled=true
+                val userList= response.body()
 
+                if(userList!!.isNotEmpty()) {
+                    val user=userList[0]
+                    writeToSharedPreference(user)
+                    if (user != null) {
+                        Navigation.findNavController(requireView())
+                            .navigate(R.id.action_loginFragment_to_searchByFragment)
+                    }
                 }
             }
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {
+                binding.btnSubmit.isEnabled=true
                 Log.i(TAG, t.toString())
             }
 
         })
+    }
+
+    private fun writeToSharedPreference(user: User) {
+        val preference=requireContext().getSharedPreferences(
+            getString(R.string.app_name),
+            MODE_PRIVATE
+        )
+        val userJson=Gson().toJson(user)
+        preference.edit().apply {
+            putBoolean("isLogin",true)
+            putString("user",userJson)
+        }.apply()
     }
 
 }
